@@ -2267,10 +2267,10 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
 
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
+     
         attemptObedienceEvolutionPatches();
 
         // no move evos, so no need to check for those
-        log("--Removing Trade Evolutions--");
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.evolutionsFrom) {
@@ -2280,20 +2280,20 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         evo.type = EvolutionType.STONE;
                         evo.extraInfo = Gen3Constants.sunStoneIndex; // sun
                                                                      // stone
-                        logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.sunStoneIndex]);
+                        cacheEvolutionChange(evo);
                     }
                     if (evo.type == EvolutionType.HAPPINESS_NIGHT && romEntry.romType == Gen3Constants.RomType_FRLG) {
                         // happiness night change to Moon Stone
                         evo.type = EvolutionType.STONE;
                         evo.extraInfo = Gen3Constants.moonStoneIndex; // moon
                                                                       // stone
-                        logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.moonStoneIndex]);
+                        cacheEvolutionChange(evo);
                     }
                     if (evo.type == EvolutionType.LEVEL_HIGH_BEAUTY && romEntry.romType == Gen3Constants.RomType_FRLG) {
                         // beauty change to level 35
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 35;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, 35);
+                        cacheEvolutionChange(evo);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {
@@ -2301,7 +2301,7 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                         // Make it into level 37, we're done.
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+                        cacheEvolutionChange(evo);
                     }
                     // Trade w/ Held Item
                     if (evo.type == EvolutionType.TRADE_ITEM) {
@@ -2309,42 +2309,41 @@ public class Gen3RomHandler extends AbstractGBRomHandler {
                             // Poliwhirl: Lv 37
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 37;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+                            cacheEvolutionChange(evo);
                         } else if (evo.from.number == Gen3Constants.slowpokeIndex) {
                             // Slowpoke: Water Stone
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen3Constants.waterStoneIndex; // water
                                                                            // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.waterStoneIndex]);
+                            cacheEvolutionChange(evo);
                         } else if (evo.from.number == Gen3Constants.seadraIndex) {
                             // Seadra: Lv 40
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 40;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 40);
+                            cacheEvolutionChange(evo);
                         } else if (evo.from.number == Gen3Constants.clamperlIndex
                                 && evo.to.number == Gen3Constants.huntailIndex) {
                             // Clamperl -> Huntail: Lv30
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 30;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 30);
+                            cacheEvolutionChange(evo);
                         } else if (evo.from.number == Gen3Constants.clamperlIndex
                                 && evo.to.number == Gen3Constants.gorebyssIndex) {
                             // Clamperl -> Gorebyss: Water Stone
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen3Constants.waterStoneIndex; // water
                                                                            // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames[Gen3Constants.waterStoneIndex]);
+                            cacheEvolutionChange(evo);
                         } else {
                             // Onix, Scyther or Porygon: Lv30
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 30;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 30);
+                            cacheEvolutionChange(evo);
                         }
                     }
                 }
             }
         }
-        logBlankLine();
     }
 
     @Override

@@ -23,23 +23,20 @@ import com.dabomstew.pkrandom.romhandlers.Gen1RomHandler;
 import com.dabomstew.pkrandom.romhandlers.RomHandler;
 
 /**
- * Basic text logger for rom changes
- * ripped out of Randomizer and RomHandler classes
- * TODO create "pokemon report" text logger
+ * More comprehensive text based report generator
  * 
- * TODO create HTML reference logger <- the whole point really
+ * TODO remove all the stuff copied straight across from TextRomLogger
  * 
- * @author Straeshi
- * 
+ * @author straeshi
  *
  */
-public class TextRomLogger extends AbstractRomLogger {
+public class PokemonReportRomLogger extends AbstractRomLogger {
 
     private static final String NEWLINE = System.getProperty("line.separator");
 
     private final PrintStream log;
 
-    public TextRomLogger(RomHandler romHandler, Settings settings, PrintStream log) {
+    public PokemonReportRomLogger(RomHandler romHandler, Settings settings, PrintStream log) {
         super(romHandler, settings);
         this.log = log;
     }
@@ -226,6 +223,7 @@ public class TextRomLogger extends AbstractRomLogger {
 
     @Override
     public void logBaseStatAndTypeChanges() {
+        // FIXME remove
         // Log base stats & types if changed at all
         if (settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED
                 && settings.getTypesMod() == Settings.TypesMod.UNCHANGED
@@ -481,29 +479,239 @@ public class TextRomLogger extends AbstractRomLogger {
 
     @Override
     public void generateLogFile() {
-        if (settings.isUpdateMoves()) {
-            logMoveUpdates();
-        }
-        logMiscTweaks();
-        logBaseStatAndTypeChanges();
-        logEvolutions();
-        logStarters();
-        // Move Data Log
-        // Placed here so it matches its position in the randomizer interface
-        logMoveChanges();
-        // Show the new movesets if applicable
-        logMovesets();
-        logTrainers();
-        logStaticPokemon();
-        logWildEncounters();
-        logTMContents();
+        // if (settings.isUpdateMoves()) {
+        // logMoveUpdates();
+        // }
+        // logMiscTweaks();
+        // logBaseStatAndTypeChanges(); DONE
+        // logEvolutions();
+        // logStarters();
+        // // Move Data Log
+        // // Placed here so it matches its position in the randomizer interface
+        // logMoveChanges();
+        // // Show the new movesets if applicable
+        // logMovesets();
+        // logTrainers();
+        // logStaticPokemon();
+        // logWildEncounters();
+        // logTMContents();
+        //
+        // if (romHandler.hasMoveTutors()) {
+        // logMoveTutorMoves();
+        // }
+        // logInGameTrades();
 
-        if (romHandler.hasMoveTutors()) {
-            logMoveTutorMoves();
-        }
-        logInGameTrades();
+        // replacement methods
+        reportAllPokemon();
+        // report TM/MoveTutor/Move stats
+        // report starters, statics, trades
+        // report wild pokemon
+        // report trainer teams
+
         logTail();
-
     }
 
+    private void reportAllPokemon() {
+        for (Pokemon pokemon : romHandler.getPokemon()) {
+            reportOnPokemon(pokemon);
+        }
+    }
+
+    private String formatPokemon(Pokemon pokemon) {
+
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("Dex#");
+        builder.append(pokemon.number);
+        builder.append(" ");
+        builder.append(pokemon.name);
+        builder.append(" ");
+
+        builder.append(pokemon.primaryType == null ? "???" : pokemon.primaryType);
+        if (pokemon.secondaryType != null) {
+            builder.append("/");
+            builder.append(pokemon.secondaryType.toString());
+        }
+        builder.append("\t");
+
+        builder.append(" HP ");
+        builder.append(pokemon.hp);
+        builder.append(" Att ");
+        builder.append(pokemon.attack);
+        builder.append(" Def ");
+        builder.append(pokemon.defense);
+        builder.append(" Spd ");
+        builder.append(pokemon.speed);
+
+        if (romHandler instanceof Gen1RomHandler) {
+            builder.append(" Spec ");
+            builder.append(pokemon.special);
+        } else {
+            builder.append(" SpcAtt ");
+            builder.append(pokemon.spatk);
+            builder.append(" SpcDef ");
+            builder.append(pokemon.spdef);
+
+            int abils = romHandler.abilitiesPerPokemon();
+            if (abils > 0) {
+                builder.append("\t");
+                builder.append(romHandler.abilityName(pokemon.ability1));
+                builder.append(" ");
+                builder.append(romHandler.abilityName(pokemon.ability2));
+                if (abils > 2) {
+                    builder.append(" ");
+                    builder.append(romHandler.abilityName(pokemon.ability3));
+                }
+            }
+            String[] itemNames = romHandler.getItemNames();
+            if (pokemon.guaranteedHeldItem > 0) {
+                builder.append(" ");
+                builder.append(itemNames[pokemon.guaranteedHeldItem] + " (100%)");
+            } else {
+                if (pokemon.commonHeldItem > 0) {
+                    builder.append(" ");
+                    builder.append(itemNames[pokemon.commonHeldItem] + " (common)");
+                }
+                if (pokemon.rareHeldItem > 0) {
+                    builder.append(" ");
+                    builder.append(itemNames[pokemon.rareHeldItem] + " (rare)");
+                }
+                if (pokemon.darkGrassHeldItem > 0) {
+                    builder.append(" ");
+                    builder.append(itemNames[pokemon.darkGrassHeldItem] + " (dark grass only)");
+                }
+            }
+
+        }
+        return builder.toString();
+    }
+
+    private static final String POKEMON_SEPARATOR = "––––––––––––––––––––––––––––––––––––––––––––––––––";
+
+    private void reportOnPokemon(Pokemon pokemon) {
+        if (pokemon == null) {
+            return;
+        }
+
+        log.println(POKEMON_SEPARATOR);
+
+        // name type basic stats etc
+        log.println(formatPokemon(pokemon));
+
+        // moves
+        log.println(formatMoveset(pokemon));
+
+        // TM/HM/MoveTutor
+        log.println(formatLearnMoveset(pokemon));
+
+        // evolution(s)
+        log.println(formatEvolutions(pokemon));
+    }
+
+    private String formatEvolutions(Pokemon pokemon) {
+        // TODO Gen5 etc. checks for other evolution types
+        StringBuilder builder = new StringBuilder();
+        for (Evolution evolution : pokemon.evolutionsTo) {
+            builder.append("Evolves from ");
+            builder.append(evolution.from.name);
+            builder.append(" via ");
+            if(evolution.type == EvolutionType.LEVEL)
+            {
+                builder.append("level at ");
+                builder.append(evolution.extraInfo);
+            } else if (evolution.type == EvolutionType.STONE)
+            {
+                builder.append(romHandler.getItemNames()[evolution.extraInfo]);
+            }
+            builder.append(NEWLINE);
+        }
+        for (Evolution evolution : pokemon.evolutionsFrom) {
+            builder.append("Evolves into ");
+            builder.append(evolution.to.name);
+            builder.append(" via ");
+            if(evolution.type == EvolutionType.LEVEL)
+            {
+                builder.append("level at ");
+                builder.append(evolution.extraInfo);
+            } else if (evolution.type == EvolutionType.STONE)
+            {
+                builder.append(romHandler.getItemNames()[evolution.extraInfo]);
+            }
+            builder.append(NEWLINE);
+        }
+        return builder.toString();
+    }
+
+    private String formatLearnMoveset(Pokemon pokemon) {
+        boolean[] TMHMcompatibility = romHandler.getTMHMCompatibility().get(pokemon);
+        List<Integer> TMMoves = romHandler.getTMMoves();
+        List<Integer> HMMoves = romHandler.getHMMoves();
+        StringBuilder builder = new StringBuilder();
+        int count = 0;
+        for (int i = 1; i < TMHMcompatibility.length; i++) {
+            if (TMHMcompatibility[i]) {
+                count++;
+                Move move;
+                if (TMMoves.size() >= i) {
+                    move = moves.get(TMMoves.get(i - 1));
+                    builder.append("TM " + i);
+                } else {
+                    move = moves.get(HMMoves.get(i - TMMoves.size() - 1));
+                    builder.append("HM " + (i - TMMoves.size()));
+                }
+                builder.append(" ");
+                builder.append(move.name);
+
+                if (count % 4 == 0) {
+                    builder.append(NEWLINE);
+                } else {
+                    builder.append("\t");
+                }
+            }
+        }
+
+        if (romHandler.hasMoveTutors()) {
+            boolean[] MTcompatibility = romHandler.getMoveTutorCompatibility().get(pokemon);
+            List<Integer> MTutorMoves = romHandler.getMoveTutorMoves();
+            for (int i = 1; i < MTcompatibility.length; i++) {
+                if (MTcompatibility[i]) {
+                    count++;
+                    Move move = moves.get(MTutorMoves.get(i - 1));
+                    builder.append("MoveTutor");
+
+                    builder.append(" ");
+                    builder.append(move.name);
+
+                    if (count % 4 == 0) {
+                        builder.append(NEWLINE);
+                    } else {
+                        builder.append("\t");
+                    }
+                }
+            }
+        }
+
+        return builder.toString();
+    }
+
+    private String formatMoveset(Pokemon pokemon) {
+        List<MoveLearnt> moveSet = romHandler.getMovesLearnt().get(pokemon);
+        StringBuilder builder = new StringBuilder();
+        int count = 0;
+        for (MoveLearnt moveLearnt : moveSet) {
+            count++;
+            Move move = moves.get(moveLearnt.move);
+
+            builder.append(moveLearnt.level);
+            builder.append(" ");
+            builder.append(move.name);
+
+            if (count % 4 == 0) {
+                builder.append(NEWLINE);
+            } else {
+                builder.append("\t");
+            }
+        }
+        return builder.toString();
+    }
 }

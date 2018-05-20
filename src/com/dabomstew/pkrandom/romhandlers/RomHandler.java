@@ -29,10 +29,12 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import com.dabomstew.pkrandom.CustomNamesSet;
 import com.dabomstew.pkrandom.MiscTweak;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
+import com.dabomstew.pkrandom.pokemon.Evolution;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.IngameTrade;
 import com.dabomstew.pkrandom.pokemon.ItemList;
@@ -197,7 +199,7 @@ public interface RomHandler {
     // stuff for printing move changes
     public void initMoveUpdates();
 
-    public void printMoveUpdates();
+
 
     // return all the moves valid in this game.
     public List<Move> getMoves();
@@ -441,5 +443,10 @@ public interface RomHandler {
     public int miscTweaksAvailable();
 
     public void applyMiscTweak(MiscTweak tweak);
+
+    // needed for external RomLogger
+    Set<Evolution> getChangedEvos();
+
+    Map<Integer, boolean[]> getMoveUpdates();
 
 }

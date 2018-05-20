@@ -1358,8 +1358,8 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
+        
         // no move evos, so no need to check for those
-        log("--Removing Trade Evolutions--");
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evol : pkmn.evolutionsFrom) {
@@ -1369,30 +1369,29 @@ public class Gen2RomHandler extends AbstractGBCRomHandler {
                             // Slowpoke: Make water stone => Slowking
                             evol.type = EvolutionType.STONE;
                             evol.extraInfo = 24; // water stone
-                            logEvoChangeStone(evol.from.name, evol.to.name, itemNames[24]);
+                            cacheEvolutionChange(evol);
                         } else if (evol.from.number == Gen2Constants.seadraIndex) {
                             // Seadra: level 40
                             evol.type = EvolutionType.LEVEL;
                             evol.extraInfo = 40; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 40);
+                            cacheEvolutionChange(evol);
                         } else if (evol.from.number == Gen2Constants.poliwhirlIndex || evol.type == EvolutionType.TRADE) {
                             // Poliwhirl or any of the original 4 trade evos
                             // Level 37
                             evol.type = EvolutionType.LEVEL;
                             evol.extraInfo = 37; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 37);
+                            cacheEvolutionChange(evol);
                         } else {
                             // A new trade evo of a single stage Pokemon
                             // level 30
                             evol.type = EvolutionType.LEVEL;
                             evol.extraInfo = 30; // level
-                            logEvoChangeLevel(evol.from.name, evol.to.name, 30);
+                            cacheEvolutionChange(evol);
                         }
                     }
                 }
             }
         }
-        logBlankLine();
 
     }
 

@@ -1102,22 +1102,20 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
     }
 
     private void fixTypeEffectiveness() {
+        
         // TODO rewrite to use table properly
         int base = romEntry.getValue("TypeEffectivenessOffset");
-        log("--Fixing Type Effectiveness--");
-        // Change Poison SE to bug (should be neutral)
-        // to Ice NE to Fire (is currently neutral)
-        log("Replaced: Poison super effective vs Bug => Ice not very effective vs Fire");
+        
+        // Change Poison SE to bug (should be neutral) to Ice NE to Fire (is currently neutral)
         rom[base + 135] = typeToByte(Type.ICE);
         rom[base + 136] = typeToByte(Type.FIRE);
-        rom[base + 137] = 5; // Not very effective
+        rom[base + 137] = 5; // Not very effective TODO magic number
+        
         // Change BUG SE to Poison to Bug NE to Poison
-        log("Changed: Bug super effective vs Poison => Bug not very effective vs Poison");
-        rom[base + 203] = 5; // Not very effective
+        rom[base + 203] = 5; // Not very effective TODO magic number
+        
         // Change Ghost 0E to Psychic to Ghost SE to Psychic
-        log("Changed: Psychic immune to Ghost => Ghost super effective vs Psychic");
         rom[base + 227] = 20; // Super effective
-        logBlankLine();
     }
 
     @Override
@@ -1405,9 +1403,10 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
 
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
+        
         // Gen 1: only regular trade evos
         // change them all to evolve at level 37
-        log("--Removing Trade Evolutions--");
+        // TODO fix magic number 37 etc...
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
                 for (Evolution evo : pkmn.evolutionsFrom) {
@@ -1415,12 +1414,11 @@ public class Gen1RomHandler extends AbstractGBCRomHandler {
                         // change
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+                        cacheEvolutionChange(evo);
                     }
                 }
             }
         }
-        logBlankLine();
     }
 
     private List<String> getTrainerClassesForText() {

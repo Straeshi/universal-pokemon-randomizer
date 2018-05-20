@@ -2000,8 +2000,9 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
+     
         Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        log("--Removing Trade Evolutions--");
+        
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -2014,30 +2015,28 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             // Replace w/ level 35
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 35;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 35);
+                            cacheEvolutionChange(evo);
                         }
                         // mt.coronet (magnezone/probopass)
                         if (evo.type == EvolutionType.LEVEL_ELECTRIFIED_AREA) {
                             // Replace w/ level 40
                             evo.type = EvolutionType.LEVEL;
                             evo.extraInfo = 40;
-                            logEvoChangeLevel(evo.from.name, evo.to.name, 40);
+                            cacheEvolutionChange(evo);
                         }
                         // moss rock (leafeon)
                         if (evo.type == EvolutionType.LEVEL_MOSS_ROCK) {
                             // Replace w/ leaf stone
                             evo.type = EvolutionType.STONE;
-                            evo.extraInfo = Gen4Constants.leafStoneIndex; // leaf
-                                                                          // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen4Constants.leafStoneIndex));
+                            evo.extraInfo = Gen4Constants.leafStoneIndex; // leaf stone
+                            cacheEvolutionChange(evo);
                         }
                         // icy rock (glaceon)
                         if (evo.type == EvolutionType.LEVEL_ICY_ROCK) {
                             // Replace w/ dawn stone
                             evo.type = EvolutionType.STONE;
-                            evo.extraInfo = Gen4Constants.dawnStoneIndex; // dawn
-                                                                          // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen4Constants.dawnStoneIndex));
+                            evo.extraInfo = Gen4Constants.dawnStoneIndex; // dawn stone
+                            cacheEvolutionChange(evo);
                         }
                     }
                     if (changeMoveEvos && evo.type == EvolutionType.LEVEL_WITH_MOVE) {
@@ -2057,14 +2056,14 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                         // change to pure level evo
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = levelLearntAt;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, levelLearntAt);
+                        cacheEvolutionChange(evo);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {
                         // Replace w/ level 37
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+                        cacheEvolutionChange(evo);
                     }
                     // Trade w/ Item
                     if (evo.type == EvolutionType.TRADE_ITEM) {
@@ -2075,11 +2074,8 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                             // So we can't do Level up w/ Held Item for him
                             // Put Water Stone instead
                             evo.type = EvolutionType.STONE;
-                            evo.extraInfo = Gen4Constants.waterStoneIndex; // water
-                                                                           // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen4Constants.waterStoneIndex));
+                            evo.extraInfo = Gen4Constants.waterStoneIndex; // water stone
                         } else {
-                            logEvoChangeLevelWithItem(evo.from.name, evo.to.name, itemNames.get(item));
                             // Replace, for this entry, w/
                             // Level up w/ Held Item at Day
                             evo.type = EvolutionType.LEVEL_ITEM_DAY;
@@ -2089,6 +2085,7 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
                         }
+                        cacheEvolutionChange(evo);
                     }
                 }
                 pkmn.evolutionsFrom.addAll(extraEvolutions);
@@ -2097,8 +2094,6 @@ public class Gen4RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-        logBlankLine();
-
     }
 
     @Override

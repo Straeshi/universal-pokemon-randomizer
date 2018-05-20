@@ -1580,51 +1580,19 @@ public abstract class AbstractRomHandler implements RomHandler {
     }
 
     private Map<Integer, boolean[]> moveUpdates;
+    
 
     @Override
     public void initMoveUpdates() {
         moveUpdates = new TreeMap<Integer, boolean[]>();
     }
-
+    
     @Override
-    public void printMoveUpdates() {
-        log("--Move Updates--");
-        List<Move> moves = this.getMoves();
-        for (int moveID : moveUpdates.keySet()) {
-            boolean[] changes = moveUpdates.get(moveID);
-            Move mv = moves.get(moveID);
-            List<String> nonTypeChanges = new ArrayList<String>();
-            if (changes[0]) {
-                nonTypeChanges.add(String.format("%d power", mv.power));
-            }
-            if (changes[1]) {
-                nonTypeChanges.add(String.format("%d PP", mv.pp));
-            }
-            if (changes[2]) {
-                nonTypeChanges.add(String.format("%.00f%% accuracy", mv.hitratio));
-            }
-            String logStr = "Made " + mv.name;
-            // type or not?
-            if (changes[3]) {
-                logStr += " be " + mv.type + "-type";
-                if (nonTypeChanges.size() > 0) {
-                    logStr += " and";
-                }
-            }
-            if (nonTypeChanges.size() > 0) {
-                logStr += " have ";
-                if (nonTypeChanges.size() == 3) {
-                    logStr += nonTypeChanges.get(0) + ", " + nonTypeChanges.get(1) + " and " + nonTypeChanges.get(2);
-                } else if (nonTypeChanges.size() == 2) {
-                    logStr += nonTypeChanges.get(0) + " and " + nonTypeChanges.get(1);
-                } else {
-                    logStr += nonTypeChanges.get(0);
-                }
-            }
-            log(logStr);
-        }
-        logBlankLine();
+    public Map<Integer, boolean[]> getMoveUpdates()
+    {
+        return moveUpdates;
     }
+    
 
     @Override
     public void randomizeMovesLearnt(boolean typeThemed, boolean noBroken, boolean forceFourStartingMoves,
@@ -2736,10 +2704,21 @@ public abstract class AbstractRomHandler implements RomHandler {
         this.setIngameTrades(trades);
     }
 
+    private Set<Evolution> changedEvos = new TreeSet<Evolution>();
+
+    @Override
+    public Set<Evolution> getChangedEvos() {
+        return changedEvos;
+    }
+
+    protected void cacheEvolutionChange(Evolution change) {
+        changedEvos.add(change);
+    }
+
     @Override
     public void condenseLevelEvolutions(int maxLevel, int maxIntermediateLevel) {
         List<Pokemon> allPokemon = this.getPokemon();
-        Set<Evolution> changedEvos = new TreeSet<Evolution>();
+
         // search for level evolutions
         for (Pokemon pk : allPokemon) {
             if (pk != null) {
@@ -2749,28 +2728,20 @@ public abstract class AbstractRomHandler implements RomHandler {
                         // level
                         if (checkEvo.extraInfo > maxLevel) {
                             checkEvo.extraInfo = maxLevel;
-                            changedEvos.add(checkEvo);
+                            cacheEvolutionChange(checkEvo);
                         }
                         // Now, seperately, if an intermediate level evo is too
                         // high, bring it down
                         for (Evolution otherEvo : pk.evolutionsTo) {
                             if (otherEvo.type.usesLevel() && otherEvo.extraInfo > maxIntermediateLevel) {
                                 otherEvo.extraInfo = maxIntermediateLevel;
-                                changedEvos.add(otherEvo);
+                                cacheEvolutionChange(otherEvo);
                             }
                         }
                     }
                 }
             }
         }
-        // Log changes now that we're done (to avoid repeats)
-        log("--Condensed Level Evolutions--");
-        for (Evolution evol : changedEvos) {
-            log(String.format("%s now evolves into %s at minimum level %d", evol.from.name, evol.to.name,
-                    evol.extraInfo));
-        }
-        logBlankLine();
-
     }
 
     @Override
@@ -3596,42 +3567,16 @@ public abstract class AbstractRomHandler implements RomHandler {
 
     }
 
+    
     protected void log(String log) {
         if (logStream != null) {
             logStream.println(log);
         }
     }
 
+    
     protected void logBlankLine() {
         if (logStream != null) {
-            logStream.println();
-        }
-    }
-
-    protected void logEvoChangeLevel(String pkFrom, String pkTo, int level) {
-        if (logStream != null) {
-            logStream.printf("Made %s evolve into %s at level %d", pkFrom, pkTo, level);
-            logStream.println();
-        }
-    }
-
-    protected void logEvoChangeLevelWithItem(String pkFrom, String pkTo, String itemName) {
-        if (logStream != null) {
-            logStream.printf("Made %s evolve into %s by leveling up holding %s", pkFrom, pkTo, itemName);
-            logStream.println();
-        }
-    }
-
-    protected void logEvoChangeStone(String pkFrom, String pkTo, String itemName) {
-        if (logStream != null) {
-            logStream.printf("Made %s evolve into %s using a %s", pkFrom, pkTo, itemName);
-            logStream.println();
-        }
-    }
-
-    protected void logEvoChangeLevelWithPkmn(String pkFrom, String pkTo, String otherRequired) {
-        if (logStream != null) {
-            logStream.printf("Made %s evolve into %s by leveling up with %s in the party", pkFrom, pkTo, otherRequired);
             logStream.println();
         }
     }

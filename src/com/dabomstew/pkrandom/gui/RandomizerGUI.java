@@ -76,6 +76,9 @@ import com.dabomstew.pkrandom.SysConstants;
 import com.dabomstew.pkrandom.Utils;
 import com.dabomstew.pkrandom.exceptions.InvalidSupplementFilesException;
 import com.dabomstew.pkrandom.exceptions.RandomizationException;
+import com.dabomstew.pkrandom.logging.PokemonReportRomLogger;
+import com.dabomstew.pkrandom.logging.RomLogger;
+import com.dabomstew.pkrandom.logging.TextRomLogger;
 import com.dabomstew.pkrandom.pokemon.GenRestrictions;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.romhandlers.AbstractDSRomHandler;
@@ -1938,6 +1941,7 @@ public class RandomizerGUI extends javax.swing.JFrame {
         }
 
         final PrintStream verboseLog = log;
+        final RomLogger logger = new PokemonReportRomLogger(romHandler, settings, log);
 
         try {
             final AtomicInteger finishedCV = new AtomicInteger(0);
@@ -1955,8 +1959,9 @@ public class RandomizerGUI extends javax.swing.JFrame {
                     try {
                         RandomizerGUI.this.romHandler.setLog(verboseLog);
                         finishedCV.set(new Randomizer(settings, RandomizerGUI.this.romHandler).randomize(filename,
-                                verboseLog, seed));
+                                logger, seed));
                         succeededSave = true;
+                        logger.generateLogFile();
                     } catch (RandomizationException ex) {
                         attemptToLogException(ex, "RandomizerGUI.saveFailedMessage",
                                 "RandomizerGUI.saveFailedMessageNoLog", true);

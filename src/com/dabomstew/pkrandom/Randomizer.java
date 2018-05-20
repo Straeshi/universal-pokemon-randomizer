@@ -24,21 +24,14 @@ package com.dabomstew.pkrandom;
 /*--  along with this program. If not, see <http://www.gnu.org/licenses/>.  --*/
 /*----------------------------------------------------------------------------*/
 
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
-import com.dabomstew.pkrandom.logging.TextRomLogger;
+import com.dabomstew.pkrandom.logging.RomLogger;
 import com.dabomstew.pkrandom.pokemon.Encounter;
 import com.dabomstew.pkrandom.pokemon.EncounterSet;
-import com.dabomstew.pkrandom.pokemon.IngameTrade;
-import com.dabomstew.pkrandom.pokemon.Move;
-import com.dabomstew.pkrandom.pokemon.MoveLearnt;
 import com.dabomstew.pkrandom.pokemon.Pokemon;
 import com.dabomstew.pkrandom.pokemon.Trainer;
 import com.dabomstew.pkrandom.pokemon.TrainerPokemon;
@@ -49,36 +42,31 @@ import com.dabomstew.pkrandom.romhandlers.RomHandler;
 // Can randomize a file based on settings. Output varies by seed.
 public class Randomizer {
 
-    private static final String NEWLINE = System.getProperty("line.separator");
-
     private final Settings settings;
     private final RomHandler romHandler;
-
-    private TextRomLogger logger;
 
     public Randomizer(Settings settings, RomHandler romHandler) {
         this.settings = settings;
         this.romHandler = romHandler;
     }
 
-    public int randomize(final String filename) {
-        return randomize(filename, new PrintStream(new OutputStream() {
-            @Override
-            public void write(int b) {
-            }
-        }));
-    }
+    // public int randomize(final String filename) {
+    // return randomize(filename, new TextRomLogger(romHandler, settings, new
+    // PrintStream(new OutputStream() {
+    // @Override
+    // public void write(int b) {
+    // }
+    // })));
+    // }
 
-    public int randomize(final String filename, final PrintStream log) {
+    public int randomize(final String filename, final RomLogger logger) {
         long seed = RandomSource.pickSeed();
-        return randomize(filename, log, seed);
+        return randomize(filename, logger, seed);
     }
 
-    public int randomize(final String filename, final PrintStream log, long seed) {
+    public int randomize(final String filename, final RomLogger logger, long seed) {
         final long startTime = System.currentTimeMillis();
         RandomSource.seed(seed);
-
-        logger = new TextRomLogger(romHandler, settings, log);
 
         int checkValue = 0;
 
@@ -99,7 +87,6 @@ public class Randomizer {
             if (!settings.isUpdateMovesLegacy()) {
                 romHandler.updateMovesToGen6();
             }
-            romHandler.printMoveUpdates();
         }
 
         changeMoveStats();
@@ -135,27 +122,16 @@ public class Randomizer {
 
         checkValue = changePokemonStatsAndTypes(checkValue);
 
-        logger.logBaseStatAndTypeChanges();
-
         // Random Evos
         // Applied after type to pick new evos based on new types.
         changeEvolutions();
-        logger.logEvolutions();
 
         // Starter Pokemon
         // Applied after type to update the strings correctly based on new types
         changeStarters();
-        logger.logStarters();
-
-        // Move Data Log
-        // Placed here so it matches its position in the randomizer interface
-        logger.logMoveChanges();
 
         // Movesets
         changeMovesets();
-
-        // Show the new movesets if applicable
-        logger.logMovesets();
 
         // Trainer Pokemon
         checkValue = changeTrainers(checkValue);
@@ -165,8 +141,6 @@ public class Randomizer {
 
         changeTrainerNames();
 
-        logger.logTrainers();
-
         // Apply metronome only mode now that trainers have been dealt with
         if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
             romHandler.metronomeOnlyMode();
@@ -175,17 +149,12 @@ public class Randomizer {
         // Static Pokemon
         checkValue = changeStaticPokemon(checkValue);
 
-        logger.logStaticPokemon();
-
         // Wild Pokemon
         changeMinWildCatchRate();
         checkValue = changeWildEncounters(checkValue);
 
-        logger.logWildEncounters();
-
         // TMs
         checkValue = changeTMContents(checkValue);
-        logger.logTMContents();
 
         // TM/HM compatibility
         changeTMHMCompatibility();
@@ -197,12 +166,10 @@ public class Randomizer {
             // Compatibility
             changeMoveTutorCompatibility();
 
-            logger.logMoveTutorMoves();
         }
 
         // In-game trades
         changeInGameTrades();
-        logger.logInGameTrades();
 
         // Field Items
         changeFieldItems();
@@ -216,8 +183,9 @@ public class Randomizer {
         // Save
         romHandler.saveRom(filename);
 
-        // Log tail
-        logger.finishLog((System.currentTimeMillis() - startTime), RandomSource.callsSinceSeed());
+        // mark time elapsed and random calls to RomLogger
+        logger.markCompletion((System.currentTimeMillis() - startTime), RandomSource.callsSinceSeed());
+
 
         return checkValue;
     }
@@ -595,7 +563,8 @@ public class Randomizer {
         }
         return checkValue;
     }
-
+    
+    // TODO streamline checkValue calculation
     private static int addToCV(int checkValue, int... values) {
         for (int value : values) {
             checkValue = Integer.rotateLeft(checkValue, 3);

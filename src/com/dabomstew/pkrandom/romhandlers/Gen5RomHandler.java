@@ -1735,8 +1735,8 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
 
     @Override
     public void removeTradeEvolutions(boolean changeMoveEvos) {
+        
         Map<Pokemon, List<MoveLearnt>> movesets = this.getMovesLearnt();
-        log("--Removing Trade Evolutions--");
         Set<Evolution> extraEvolutions = new HashSet<Evolution>();
         for (Pokemon pkmn : pokes) {
             if (pkmn != null) {
@@ -1759,14 +1759,14 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         // change to pure level evo
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = levelLearntAt;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, levelLearntAt);
+                        cacheEvolutionChange(evo);
                     }
                     // Pure Trade
                     if (evo.type == EvolutionType.TRADE) {
                         // Replace w/ level 37
                         evo.type = EvolutionType.LEVEL;
                         evo.extraInfo = 37;
-                        logEvoChangeLevel(evo.from.name, evo.to.name, 37);
+                        cacheEvolutionChange(evo);
                     }
                     // Trade w/ Item
                     if (evo.type == EvolutionType.TRADE_ITEM) {
@@ -1779,9 +1779,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             evo.type = EvolutionType.STONE;
                             evo.extraInfo = Gen5Constants.waterStoneIndex; // water
                                                                            // stone
-                            logEvoChangeStone(evo.from.name, evo.to.name, itemNames.get(Gen5Constants.waterStoneIndex));
+                            
                         } else {
-                            logEvoChangeLevelWithItem(evo.from.name, evo.to.name, itemNames.get(item));
+                            
                             // Replace, for this entry, w/
                             // Level up w/ Held Item at Day
                             evo.type = EvolutionType.LEVEL_ITEM_DAY;
@@ -1790,7 +1790,9 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                             Evolution extraEntry = new Evolution(evo.from, evo.to, true,
                                     EvolutionType.LEVEL_ITEM_NIGHT, item);
                             extraEvolutions.add(extraEntry);
+                            
                         }
+                        cacheEvolutionChange(evo);
                     }
                     if (evo.type == EvolutionType.TRADE_SPECIAL) {
                         // This is the karrablast <-> shelmet trade
@@ -1800,9 +1802,7 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                         evo.type = EvolutionType.LEVEL_WITH_OTHER;
                         evo.extraInfo = (evo.from.number == Gen5Constants.karrablastIndex ? Gen5Constants.shelmetIndex
                                 : Gen5Constants.karrablastIndex);
-                        logEvoChangeLevelWithPkmn(evo.from.name, evo.to.name,
-                                pokes[(evo.from.number == Gen5Constants.karrablastIndex ? Gen5Constants.shelmetIndex
-                                        : Gen5Constants.karrablastIndex)].name);
+                        cacheEvolutionChange(evo);
                     }
                 }
 
@@ -1812,7 +1812,6 @@ public class Gen5RomHandler extends AbstractDSRomHandler {
                 }
             }
         }
-        logBlankLine();
     }
 
     @Override
