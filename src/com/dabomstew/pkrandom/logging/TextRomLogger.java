@@ -44,8 +44,7 @@ public class TextRomLogger extends AbstractRomLogger {
         this.log = log;
     }
 
-    @Override
-    public void logMoveUpdates() {
+    private void logMoveUpdates() {
         Map<Integer, boolean[]> moveUpdates = romHandler.getMoveUpdates();
         log.println("--Move Updates--");
         for (int moveID : moveUpdates.keySet()) {
@@ -84,8 +83,7 @@ public class TextRomLogger extends AbstractRomLogger {
         log.println();
     }
 
-    @Override
-    public void logChangedEvolutions() {
+    private void logChangedEvolutions() {
         // Log changes now that we're done (to avoid repeats)
 
         if (settings.isChangeImpossibleEvolutions()) {
@@ -109,8 +107,7 @@ public class TextRomLogger extends AbstractRomLogger {
         log.println();
     }
 
-    @Override
-    public void logEvolutions() {
+    private void logEvolutions() {
         if (settings.getEvolutionsMod() == Settings.EvolutionsMod.RANDOM) {
             log.println("--Randomized Evolutions--");
             List<Pokemon> allPokes = romHandler.getPokemon();
@@ -137,8 +134,7 @@ public class TextRomLogger extends AbstractRomLogger {
 
     }
 
-    @Override
-    public void logMovesets() {
+    private void logMovesets() {
         if (settings.getMovesetsMod() == Settings.MovesetsMod.UNCHANGED) {
             log.println("Pokemon Movesets: Unchanged." + NEWLINE);
         } else if (settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY) {
@@ -173,8 +169,7 @@ public class TextRomLogger extends AbstractRomLogger {
         }
     }
 
-    @Override
-    public void logMoveTutorMoves() {
+    private void logMoveTutorMoves() {
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getMoveTutorMovesMod() == Settings.MoveTutorMovesMod.RANDOM) {
             log.println("--Move Tutor Moves--");
@@ -190,8 +185,7 @@ public class TextRomLogger extends AbstractRomLogger {
         }
     }
 
-    @Override
-    public void logTMContents() {
+    private void logTMContents() {
         if (!(settings.getMovesetsMod() == Settings.MovesetsMod.METRONOME_ONLY)
                 && settings.getTmsMod() == Settings.TMsMod.RANDOM) {
             log.println("--TM Moves--");
@@ -207,8 +201,7 @@ public class TextRomLogger extends AbstractRomLogger {
         }
     }
 
-    @Override
-    public void logInGameTrades() {
+    private void logInGameTrades() {
         if (!(settings.getInGameTradesMod() == Settings.InGameTradesMod.UNCHANGED)) {
             log.println("--In-Game Trades--");
             List<IngameTrade> newTrades = romHandler.getIngameTrades();
@@ -224,8 +217,7 @@ public class TextRomLogger extends AbstractRomLogger {
         }
     }
 
-    @Override
-    public void logBaseStatAndTypeChanges() {
+    private void logBaseStatAndTypeChanges() {
         // Log base stats & types if changed at all
         if (settings.getBaseStatisticsMod() == Settings.BaseStatisticsMod.UNCHANGED
                 && settings.getTypesMod() == Settings.TypesMod.UNCHANGED
@@ -306,8 +298,7 @@ public class TextRomLogger extends AbstractRomLogger {
         }
     }
 
-    @Override
-    public void logStarters() {
+    private void logStarters() {
         if (romHandler.canChangeStarters()) {
             if (settings.getStartersMod() == Settings.StartersMod.CUSTOM) {
                 log.println("--Custom Starters--");
@@ -326,8 +317,7 @@ public class TextRomLogger extends AbstractRomLogger {
 
     }
 
-    @Override
-    public void logWildEncounters() {
+    private void logWildEncounters() {
         if (settings.getWildPokemonMod() == Settings.WildPokemonMod.UNCHANGED) {
             log.println("Wild Pokemon: Unchanged." + NEWLINE);
         } else {
@@ -361,8 +351,7 @@ public class TextRomLogger extends AbstractRomLogger {
         }
     }
 
-    @Override
-    public void logTrainers() {
+    private void logTrainers() {
         if (settings.getTrainersMod() == Settings.TrainersMod.UNCHANGED
                 && !settings.isRivalCarriesStarterThroughout()) {
             log.println("Trainers: Unchanged." + NEWLINE);
@@ -396,8 +385,7 @@ public class TextRomLogger extends AbstractRomLogger {
         }
     }
 
-    @Override
-    public void logStaticPokemon() {
+    private void logStaticPokemon() {
         List<Pokemon> newStatics = romHandler.getStaticPokemon();
         if (settings.getStaticPokemonMod() == Settings.StaticPokemonMod.UNCHANGED) {
             log.println("Static Pokemon: Unchanged." + NEWLINE);
@@ -421,8 +409,7 @@ public class TextRomLogger extends AbstractRomLogger {
         }
     }
 
-    @Override
-    public void logMoveChanges() {
+    private void logMoveChanges() {
         if (!settings.isRandomizeMoveAccuracies() && !settings.isRandomizeMovePowers() && !settings.isRandomizeMovePPs()
                 && !settings.isRandomizeMoveCategory() && !settings.isRandomizeMoveTypes()) {
             if (!settings.isUpdateMoves()) {
@@ -459,8 +446,7 @@ public class TextRomLogger extends AbstractRomLogger {
         log.println("------------------------------------------------------------------");
     }
 
-    @Override
-    public void logMiscTweaks() {
+    private void logMiscTweaks() {
         // TODO this is crap really
         int currentMiscTweaks = settings.getCurrentMiscTweaks();
         if (romHandler.miscTweaksAvailable() != 0) {
